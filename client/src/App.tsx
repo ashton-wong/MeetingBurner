@@ -7,7 +7,6 @@ import Header from "@/components/Header";
 import Dashboard from "@/pages/Dashboard";
 import SetupMeeting from "@/pages/SetupMeeting";
 import ActiveMeeting from "@/pages/ActiveMeeting";
-import MeetingResults from "@/pages/MeetingResults";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,7 +15,6 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/setup" component={SetupMeeting} />
       <Route path="/active" component={ActiveMeeting} />
-      <Route path="/results" component={MeetingResults} />
       <Route component={NotFound} />
     </Switch>
   );

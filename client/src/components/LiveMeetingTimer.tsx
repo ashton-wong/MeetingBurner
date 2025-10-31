@@ -51,7 +51,8 @@ export default function LiveMeetingTimer({
 
   const handleEndMeeting = () => {
     audio.pause();
-    onEndMeeting(elapsedMinutes, totalCost);
+    const actualMinutes = Math.ceil(elapsedSeconds / 60);
+    onEndMeeting(actualMinutes, totalCost);
   };
 
   return (

@@ -1,49 +1,78 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import LiveMeetingTimer from "@/components/LiveMeetingTimer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SALARY_BANDS } from "@shared/schema";
 import { Users } from "lucide-react";
+import { getMeeting, updateMeeting } from "@/lib/api";
+import { calculateEfficiencyScore } from "@/lib/scoring";
+import { queryClient } from "@/lib/queryClient";
 
 export default function ActiveMeeting() {
   const [, setLocation] = useLocation();
-  const [meetingData, setMeetingData] = useState<any>(null);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
+  const [attendees, setAttendees] = useState<any[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('currentMeeting');
-    if (stored) {
-      setMeetingData(JSON.parse(stored));
+    const storedId = localStorage.getItem('activeMeetingId');
+    const storedAttendees = localStorage.getItem('meetingAttendees');
+    
+    if (storedId) {
+      setMeetingId(storedId);
     } else {
       setLocation('/setup');
     }
+
+    if (storedAttendees) {
+      setAttendees(JSON.parse(storedAttendees));
+    }
   }, [setLocation]);
 
-  if (!meetingData) return null;
+  const { data: meeting } = useQuery({
+    queryKey: ['/api/meetings', meetingId],
+    queryFn: () => getMeeting(meetingId!),
+    enabled: !!meetingId,
+  });
 
-  const costPerSecond = meetingData.attendees.reduce(
+  const updateMeetingMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: any }) => 
+      updateMeeting(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/meetings'] });
+    },
+  });
+
+  if (!meeting || !meetingId) return null;
+
+  const costPerSecond = attendees.reduce(
     (sum: number, att: any) => sum + (SALARY_BANDS[att.role as keyof typeof SALARY_BANDS] / 3600),
     0
   );
 
   const handleEndMeeting = (actualMinutes: number, totalCost: number) => {
-    console.log('Meeting ended:', { actualMinutes, totalCost });
-    
     const score = calculateEfficiencyScore({
-      scheduledMinutes: meetingData.durationMinutes,
+      scheduledMinutes: meeting.scheduledDurationMinutes,
       actualMinutes,
-      hasAgenda: meetingData.hasAgenda,
-      attendeeCount: meetingData.attendees.length,
+      hasAgenda: meeting.hasAgenda,
+      attendeeCount: meeting.attendeeCount,
     });
 
-    localStorage.setItem('lastMeetingResult', JSON.stringify({
-      ...meetingData,
-      actualMinutes,
-      totalCost,
-      ...score,
-    }));
-    localStorage.removeItem('currentMeeting');
-    setLocation('/results');
+    updateMeetingMutation.mutate({
+      id: meetingId,
+      updates: {
+        actualDurationMinutes: actualMinutes,
+        totalCost: Math.round(totalCost),
+        efficiencyScore: score.score,
+        efficiencyGrade: score.grade,
+        endedAt: new Date(),
+      },
+    });
+
+    localStorage.removeItem('activeMeetingId');
+    localStorage.removeItem('meetingAttendees');
+    setLocation('/');
   };
 
   return (
@@ -51,16 +80,16 @@ export default function ActiveMeeting() {
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-display font-bold mb-2" data-testid="text-meeting-title">
-            {meetingData.title}
+            {meeting.title}
           </h1>
           <div className="flex items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span>{meetingData.attendees.length} attendees</span>
+              <span>{meeting.attendeeCount} attendees</span>
             </div>
             <div>•</div>
-            <div>Scheduled: {meetingData.durationMinutes} minutes</div>
-            {meetingData.hasAgenda && (
+            <div>Scheduled: {meeting.scheduledDurationMinutes} minutes</div>
+            {meeting.hasAgenda && (
               <>
                 <div>•</div>
                 <Badge variant="default" className="bg-chart-5">Has Agenda</Badge>
@@ -70,120 +99,24 @@ export default function ActiveMeeting() {
         </div>
 
         <LiveMeetingTimer
-          scheduledMinutes={meetingData.durationMinutes}
+          scheduledMinutes={meeting.scheduledDurationMinutes}
           costPerSecond={costPerSecond}
           onEndMeeting={handleEndMeeting}
         />
 
-        <Card className="mt-8 p-6">
-          <h3 className="font-semibold mb-4">Meeting Attendees</h3>
-          <div className="flex flex-wrap gap-2">
-            {meetingData.attendees.map((att: any) => (
-              <Badge key={att.id} variant="secondary">
-                {att.name} ({att.role})
-              </Badge>
-            ))}
-          </div>
-        </Card>
+        {attendees.length > 0 && (
+          <Card className="mt-8 p-6">
+            <h3 className="font-semibold mb-4">Meeting Attendees</h3>
+            <div className="flex flex-wrap gap-2">
+              {attendees.map((att: any) => (
+                <Badge key={att.id} variant="secondary">
+                  {att.name} ({att.role})
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );
-}
-
-function calculateEfficiencyScore({
-  scheduledMinutes,
-  actualMinutes,
-  hasAgenda,
-  attendeeCount,
-}: {
-  scheduledMinutes: number;
-  actualMinutes: number;
-  hasAgenda: boolean;
-  attendeeCount: number;
-}) {
-  let score = 100;
-  const breakdown = [];
-
-  const isOvertime = actualMinutes > scheduledMinutes;
-  const endedEarly = actualMinutes < scheduledMinutes;
-
-  breakdown.push({
-    label: "Started on time",
-    points: 0,
-    reason: "Meeting started as scheduled",
-  });
-
-  if (isOvertime) {
-    score -= 10;
-    breakdown.push({
-      label: "Ran over time",
-      points: -10,
-      reason: `Meeting exceeded scheduled duration by ${actualMinutes - scheduledMinutes} minutes`,
-    });
-  }
-
-  if (!hasAgenda) {
-    score -= 15;
-    breakdown.push({
-      label: "No agenda",
-      points: -15,
-      reason: "No agenda was provided for this meeting",
-    });
-  } else {
-    breakdown.push({
-      label: "Had agenda",
-      points: 0,
-      reason: "Meeting had a clear agenda",
-    });
-  }
-
-  if (attendeeCount > 8) {
-    score -= 20;
-    breakdown.push({
-      label: "Too many attendees",
-      points: -20,
-      reason: `${attendeeCount} attendees is inefficient for decision-making`,
-    });
-  }
-
-  if (endedEarly) {
-    score += 10;
-    breakdown.push({
-      label: "Ended early",
-      points: 10,
-      reason: `Meeting ended ${scheduledMinutes - actualMinutes} minutes early`,
-    });
-  }
-
-  if (actualMinutes < 30) {
-    score += 10;
-    breakdown.push({
-      label: "Brief meeting",
-      points: 10,
-      reason: "Meeting was under 30 minutes",
-    });
-  }
-
-  const grade = 
-    score >= 95 ? 'A+' :
-    score >= 90 ? 'A' :
-    score >= 85 ? 'A-' :
-    score >= 80 ? 'B+' :
-    score >= 75 ? 'B' :
-    score >= 70 ? 'B-' :
-    score >= 65 ? 'C+' :
-    score >= 60 ? 'C' :
-    score >= 55 ? 'C-' :
-    score >= 50 ? 'D+' :
-    score >= 45 ? 'D' :
-    'F';
-
-  const gradeDescription = 
-    grade.startsWith('A') ? 'Actually Productive' :
-    grade.startsWith('B') ? 'Borderline Acceptable' :
-    grade.startsWith('C') ? "Could've Been Napping" :
-    grade.startsWith('D') ? 'Time Vortex' :
-    'Everyone Could\'ve Been Napping';
-
-  return { grade, gradeDescription, score, breakdown };
 }

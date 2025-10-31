@@ -13,18 +13,35 @@ export const meetings = pgTable("meetings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   scheduledDurationMinutes: integer("scheduled_duration_minutes").notNull(),
-  actualDurationMinutes: integer("actual_duration_minutes"),
+  actualDurationMinutes: integer("actual_duration_minutes").default(0),
   totalCost: integer("total_cost").notNull(),
   hasAgenda: boolean("has_agenda").notNull().default(false),
   attendeeCount: integer("attendee_count").notNull(),
-  efficiencyScore: integer("efficiency_score"),
-  efficiencyGrade: text("efficiency_grade"),
-  startedAt: timestamp("started_at"),
+  efficiencyScore: integer("efficiency_score").default(0),
+  efficiencyGrade: text("efficiency_grade").default(""),
+  startedAt: timestamp("started_at").defaultNow(),
   endedAt: timestamp("ended_at"),
 });
 
 export const insertAttendeeSchema = createInsertSchema(attendees).omit({ id: true });
-export const insertMeetingSchema = createInsertSchema(meetings).omit({ id: true });
+export const insertMeetingSchema = createInsertSchema(meetings).omit({ 
+  id: true, 
+  actualDurationMinutes: true,
+  efficiencyScore: true,
+  efficiencyGrade: true,
+  startedAt: true,
+  endedAt: true,
+});
+
+export const updateMeetingSchema = createInsertSchema(meetings).omit({ 
+  id: true,
+  title: true,
+  scheduledDurationMinutes: true,
+  totalCost: true,
+  hasAgenda: true,
+  attendeeCount: true,
+  startedAt: true,
+}).partial();
 
 export type InsertAttendee = z.infer<typeof insertAttendeeSchema>;
 export type Attendee = typeof attendees.$inferSelect;

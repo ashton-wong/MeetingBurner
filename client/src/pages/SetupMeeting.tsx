@@ -1,15 +1,41 @@
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 import MeetingSetupForm from "@/components/MeetingSetupForm";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createMeeting } from "@/lib/api";
+import { SALARY_BANDS } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SetupMeeting() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const createMeetingMutation = useMutation({
+    mutationFn: createMeeting,
+    onSuccess: (meeting) => {
+      localStorage.setItem('activeMeetingId', meeting.id);
+      setLocation('/active');
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleStartMeeting = (data: any) => {
-    console.log('Meeting started with:', data);
-    localStorage.setItem('currentMeeting', JSON.stringify(data));
-    setLocation('/active');
+    createMeetingMutation.mutate({
+      title: data.title,
+      scheduledDurationMinutes: data.durationMinutes,
+      totalCost: 0,
+      hasAgenda: data.hasAgenda,
+      attendeeCount: data.attendees.length,
+    });
+
+    localStorage.setItem('meetingAttendees', JSON.stringify(data.attendees));
   };
 
   return (
