@@ -1,0 +1,161 @@
+1. Problem & Opportunity
+Problem: Most organizations suffer from "meeting bloat." Meetings are scheduled by default, often lacking clear agendas, running over time, and involving unnecessary attendees. This behavior persists because the cost of a meeting is invisible. An hour-long meeting with 8 people isn't "one hour"; it's an 8-person-hour "cost" pulled directly from the budget, interrupting 8 separate workflows. 
+Opportunity: By making the cost of meetings tangible and visible in real-time, you can create powerful behavioral "nudges." Teams and managers can see the financial and time-based impact of their meeting habits, empowering them to be more intentional about when they schedule a meeting versus when they send an async update.
+
+2. Goals & Success Metrics
+🎯 Goals
+Primary Goal: Reduce the total time and money spent on low-value, inefficient meetings.
+Secondary Goal: Increase employee and manager awareness of the real cost of meetings.
+Tertiary Goal: Drive the adoption of more efficient, asynchronous communication (e.g., emails, Slack/Teams updates, recorded looms) for topics that don't require a live meeting.
+📊 Success Metrics
+Engagement (Adoption):
+Number of active users/teams using the app.
+Percentage of meetings being "graded" or tracked by the app.
+Behavioral Change (Effectiveness):
+Metric 1: A decrease in the average number of meetings per user per week.
+Metric 2: A decrease in the average meeting duration.
+Metric 3: An increase in the number of meetings declined or flagged as "Could be an email."
+Outcome (ROI):
+Metric 1: A reduction in the calculated "Total Meeting Spend" (in $$$) per department, quarter-over-quarter.
+Metric 2 (Qualitative): An increase in employee survey scores related to "time available for deep work" or "meeting efficiency."
+
+3. Expansion: The "Meeting Pre-Flight Check"
+A key area to expand is before the meeting is even scheduled. The app should integrate directly with Google Calendar and Outlook.
+When a user creates a new meeting invite:
+Attendee Cost: As they add attendees, a small "Estimated Cost for this 1 hour:" counter ticks up in real-time. (e.g., "Est. Cost: $750").
+Agenda Nudge: If there is no text in the "Description" (agenda) field, the "Send" button turns yellow, and a warning appears: "Meetings without an agenda are 50% less effective. Add a few bullet points?"
+The "Async" Button: A new button appears next to "Send" that says "Request Async Update Instead." This could send a pre-formatted email or Slack message to the group (e.g., "For the topic of 'Project Update,' can everyone please provide a 1-paragraph summary by EOD Tuesday?").
+
+4. Prototype Overview: "The Money Burner 3000"
+The prototype would consist of three main parts:
+Part 1: The Setup (Admin/User)
+A simple web dashboard where:
+A team admin sets up the team and invites members.
+The admin inputs estimated hourly salary bands (e.g., "Junior: $45/hr," "Senior: $75/hr," "Manager: $100/hr"). This is for calculation and can be anonymized.
+Individual users connect their calendars (Google/Outlook).
+Part 2: The Live Meeting Plugin (The "Burner")
+This is a browser extension or desktop app overlay for Zoom, Google Meet, and Teams.
+When a meeting starts, a small, non-intrusive box appears in the corner.
+It shows:
+Live Cost: A real-time counter: "This meeting has cost: $127.50"
+The Animation: A small, pixelated animation of a dollar bill burning.
+Timer: A clock showing "Scheduled End: 4:00 PM" vs. "Current Time: 4:05 PM."
+The "Yakety Sax" Easter Egg: If the meeting runs 10 minutes (or 2x) over, a small button appears: "Play the 'runover' music?" (It should be user-initiated to avoid total chaos, but the prompt itself is the joke).
+Part 3: The Post-Meeting Dashboard (The "ROI Calculator")
+After the meeting, the user (or PM) gets a "receipt." This data feeds into a personal dashboard.
+The dashboard shows: "This week, you spent 12 hours in meetings, costing an estimated $1,450."
+It lists your past meetings with their "Meeting Efficiency Score."
+The Score (e.g., "C+ | Could've Been Napping"): The prototype calculates this with a simple algorithm:
+Starts with 100 points.
+-10 points if it ran over time.
+-15 points if it had no agenda.
+-20 points if it had >8 attendees (inefficient).
++10 points if it ended early.
++10 points if it was under 30 minutes.
+
+
+
+LEAN PRD 
+
+Lean PRD: The Money Burner 3000
+Meeting Time ROI Calculator
+
+1. Problem / Opportunity
+Problem: Inefficient meetings are a common occurrence, with meetings running over time, involving unnecessary attendees, and unclear agendas. This behavior occurs because the cost of a meeting is intangible and often ignored; The cost of an hour-long meeting with 5 people isn’t just “one hour”, it’s 5 people’s opportunity costs and 5 different interruptions in workflows.
+Users: This product can be used by any individual who suffers from overly long meetings and poorly planned meeting times. This includes coworkers, classmates, executives, and managers. 
+Impact/Benefits: Through making the cost of meetings more tangible and visible, powerful behavioral forces can directly nudge members to optimize their meeting times and speaking points. Users can see real time financial and time-based impacts of their meeting habits, which would empower them to be more intentional with their scheduling and reduce opportunity costs. 
+2. Goals and Success Metrics
+Primary Goal: Help project managers reduce unnecessary meeting time by 30% within 3 months by providing real-time visibility into meeting costs.
+Primary Goal: Help users reduce unnecessary meeting time by end of quarter by providing real-time visibility into meeting efficiency.
+Secondary Goals:
+Increase adoption of async communication tools for routine updates
+Improve meeting quality by encouraging better preparation and tighter agendas
+Secondary Goals: 
+Improve meeting efficiency and quality by encouraging better preparation for meetings
+
+
+Success Metrics:
+Adoption: 70% of PMs in pilot group actively use the tool for 4+ weeks
+Behavior Change: 25% reduction in average meeting duration across tracked meetings
+Time Saved: Teams report 3-5 hours/week saved per person through meeting optimization
+3. Prototype Overview
+Prototype Link: Money Burner 3000 Demo
+The prototype demonstrates three core flows:
+Meeting Cost Calculator: User inputs attendees and duration; system shows real-time cost burn with animated dollar bills
+Weekly Report Generator: Dashboard displays total meeting costs vs. productive work time with efficiency grades (A+ to "Everyone Could've Been Napping")
+Meeting Alternatives Suggester: AI analyzes meeting patterns and recommends which recurring meetings could be emails or Slack updates
+Known Shortcuts:
+Using fake salary data (flat $75/hour rate for all roles)
+Calendar integration is mocked with manual entry
+No actual calendar sync or authentication
+Historical data is randomly generated
+Disclosure: This prototype is for illustration purposes only. The production application will require full calendar integration, secure salary data handling, and robust backend architecture to be built by the engineering team.
+4. Users & Key Flows
+Target User: Project managers and team leads who schedule 5+ meetings per week and are responsible for team productivity and resource allocation.
+User Flow Diagram:
+┌─────────────────┐
+│  User Opens App │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────┐
+│ Connects Calendar   │
+│ (One-time setup)    │
+└────────┬────────────┘
+         │
+         ▼
+┌──────────────────────┐      ┌─────────────────────┐
+│ Dashboard View:      │──────│ Click on Meeting    │
+│ • This Week's Burn   │      └─────────┬───────────┘
+│ • Efficiency Score   │                │
+│ • Top Cost Meetings  │                ▼
+└──────────┬───────────┘      ┌─────────────────────┐
+           │                   │ Meeting Detail View:│
+           │                   │ • Cost Breakdown    │
+           │                   │ • Duration History  │
+           │                   │ • Alternatives      │
+           │                   └─────────────────────┘
+           ▼
+┌──────────────────────┐
+│ Weekly Email Report: │
+│ "You spent $X in     │
+│  meetings this week" │
+└──────────────────────┘
+5. Requirements (Functional and Non-Functional)
+Functional Requirements:
+System must integrate with Google Calendar and Outlook to automatically pull meeting data (attendees, duration, recurrence)
+System must calculate meeting costs based on attendee salary ranges or role-based estimates
+System must display real-time "cost burn" during active meetings with visual indicators
+System must generate weekly summary reports showing total meeting costs, efficiency scores, and trends
+System must provide actionable recommendations for meeting alternatives based on pattern analysis
+The app must integrate with the Google Calendar API to automatically pull meeting data
+Attendees 
+Duration
+Recurrence
+The app must calculate the meeting costs based on attendee salary ranges if given, or role-based estimates
+The app must display a real-time cost burn visual indicator during active meetings
+The app must generate weekly reports showing the meeting costs, and efficiency per meeting
+The app must provide action items to improve efficiency
+Non-Functional Requirements:
+Security: All salary data must be encrypted at rest and in transit; comply with SOC 2 standards
+Performance: Dashboard must load in under 2 seconds; cost calculations must update in real-time (<500ms latency)
+Security: All salary data must be anonymized
+Performance: Cost calculations must update in real-time, with less than 10 seconds latency
+6. Constraints / Dependencies
+Technical Constraints:
+Requires Google Calendar API and Microsoft Graph API access for calendar integration
+Need access to HR systems or salary band data (sensitive information requires legal/privacy review)
+Limited by calendar API rate limits (may need caching strategy for large organizations)
+Dependencies:
+HR/Legal approval required to access and handle salary data
+Dependent on calendar API permissions from IT/security team
+Requires integration with existing SSO/authentication systems
+7. Open Questions / Risks
+Open Questions:
+How do we handle salary data sensitivity? (Role-based averages vs. actual salaries?)
+Should we track external meeting costs (clients, vendors) differently?
+What's the right frequency for nudges/notifications without becoming annoying?
+Key Risks:
+Privacy concerns: Employees may resist tracking if they feel surveilled; need to position as team-level optimization, not individual monitoring
+Data accuracy: Garbage in, garbage out—if salary estimates are way off, insights become meaningless
+Adoption resistance: Managers may ignore data if it conflicts with organizational meeting culture; need executive sponsorship for behavior change
