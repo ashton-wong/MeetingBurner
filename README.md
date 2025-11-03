@@ -1,4 +1,4 @@
-# MeetingBurner
+# Money Burner 3000
 
 MeetingBurner is a lightweight productivity tool for running and analyzing meetings. It helps teams run tighter, more efficient meetings by tracking agenda items, per-item timing, live transcription, and a simple efficiency scoring system. The app is a Vite + React frontend with an optional Express backend. In development the server uses an in-memory store; the frontend also persists meeting reports to localStorage so the app works in static deployments.
 
