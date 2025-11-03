@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMeetingSchema } from "@shared/schema";
+import { insertMeetingSchema, updateMeetingSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/meetings", async (req, res) => {
@@ -37,8 +37,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/meetings/:id", async (req, res) => {
     try {
-      const validatedData = insertMeetingSchema.partial().parse(req.body);
-      const meeting = await storage.updateMeeting(req.params.id, validatedData);
+      // Use updateMeetingSchema which permits updating fields like actualDurationMinutes, efficiencyScore, efficiencyGrade, and endedAt
+      const validatedData = updateMeetingSchema.parse(req.body);
+      const meeting = await storage.updateMeeting(req.params.id, validatedData as any);
       if (!meeting) {
         return res.status(404).json({ error: "Meeting not found" });
       }
@@ -47,6 +48,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ error: error.message });
     }
   });
+
+  // Google-related endpoints removed per project configuration.
 
   const httpServer = createServer(app);
 

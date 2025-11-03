@@ -36,6 +36,12 @@ export default function SetupMeeting() {
     });
 
     localStorage.setItem('meetingAttendees', JSON.stringify(data.attendees));
+    // store agenda locally so the active meeting can show and track checklist
+    if (data.agenda) {
+      localStorage.setItem('meetingAgenda', JSON.stringify(data.agenda));
+      // clear any previous checked state
+      localStorage.removeItem('meetingAgendaChecked');
+    }
   };
 
   return (

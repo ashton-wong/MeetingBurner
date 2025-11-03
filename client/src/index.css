@@ -352,3 +352,38 @@
     inset: -1px;
   }
 }
+
+/* Halloween theme overrides */
+.halloween {
+  --background: 280 20% 6%; /* deep purple */
+  --foreground: 30 100% 96%;
+  --primary: 34 95% 50%; /* bright orange */
+  --destructive: 28 90% 45%;
+  --muted: 280 12% 18%;
+  --muted-foreground: 30 10% 70%;
+  --card: 280 18% 10%;
+  --card-foreground: 30 10% 96%;
+}
+
+.halloween body {
+  background: radial-gradient(ellipse at top left, rgba(255,165,0,0.06), transparent 20%), radial-gradient(ellipse at bottom right, rgba(149,76,233,0.06), transparent 25%), linear-gradient(180deg, #0b0226 0%, #32124a 100%);
+  background-attachment: fixed;
+}
+
+/* spooky decorative bats using pseudo-element */
+.halloween .max-w-7xl::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60"><g fill="%23ffffff" fill-opacity="0.04"><path d="M10 30c10-10 30-10 40 0 10-10 30-10 40 0 10-10 30-10 40 0v30h-160z"/></g></svg>');
+  background-repeat: repeat-x;
+  background-position: top left;
+  pointer-events: none;
+}
+
+/* accent the flame/pumpkin colors */
+.halloween .text-destructive { color: #ff7a18 !important; }
+.halloween .bg-destructive { background-color: #ff7a18 !important; }
+
+/* small Halloween font tweak for header when active */
+.halloween .font-display { font-family: 'Space Grotesk', 'Creepster', sans-serif; }

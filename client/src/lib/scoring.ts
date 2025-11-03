@@ -35,10 +35,13 @@ export function calculateEfficiencyScore({
   });
 
   if (isOvertime) {
-    score -= 10;
+    // Penalty scaled by percentage over time (same approach as per-agenda penalties)
+    const ratio = scheduledMinutes > 0 ? actualMinutes / scheduledMinutes : 1;
+    const points = ratio > 1 ? -Math.ceil((ratio - 1) * 10) : 0;
+    score += points; // points is negative when overtime
     breakdown.push({
       label: "Ran over time",
-      points: -10,
+      points,
       reason: `Meeting exceeded scheduled duration by ${actualMinutes - scheduledMinutes} minutes`,
     });
   }
@@ -67,23 +70,7 @@ export function calculateEfficiencyScore({
     });
   }
 
-  if (endedEarly) {
-    score += 10;
-    breakdown.push({
-      label: "Ended early",
-      points: 10,
-      reason: `Meeting ended ${scheduledMinutes - actualMinutes} minutes early`,
-    });
-  }
-
-  if (actualMinutes < 30) {
-    score += 10;
-    breakdown.push({
-      label: "Brief meeting",
-      points: 10,
-      reason: "Meeting was under 30 minutes",
-    });
-  }
+  // Note: no explicit scoring or breakdown entry for ending early
 
   const grade = 
     score >= 95 ? 'A+' :

@@ -24,6 +24,12 @@ export default function LiveMeetingTimer({
     return a;
   });
 
+  const [halloween, setHalloween] = useState(false);
+
+  useEffect(() => {
+    setHalloween(document.documentElement.classList.contains('halloween'));
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setElapsedSeconds((s) => s + 1);
@@ -64,19 +70,27 @@ export default function LiveMeetingTimer({
           <div>
             <p className="text-sm text-muted-foreground mb-2">Money Burned</p>
             <div className="flex items-center justify-center gap-4">
-              <img 
-                src={burningMoneyImg} 
-                alt="Burning money"
-                className="w-16 h-16 animate-pulse"
-              />
+              {halloween ? (
+                <div className="w-16 h-16 flex items-center justify-center text-4xl">🎃</div>
+              ) : (
+                <img 
+                  src={burningMoneyImg} 
+                  alt="Burning money"
+                  className="w-16 h-16 animate-pulse"
+                />
+              )}
               <div className="text-7xl font-display font-bold text-destructive tabular-nums" data-testid="text-live-cost">
                 ${totalCost.toFixed(2)}
               </div>
-              <img 
-                src={burningMoneyImg} 
-                alt="Burning money"
-                className="w-16 h-16 animate-pulse"
-              />
+              {halloween ? (
+                <div className="w-16 h-16 flex items-center justify-center text-4xl">🎃</div>
+              ) : (
+                <img 
+                  src={burningMoneyImg} 
+                  alt="Burning money"
+                  className="w-16 h-16 animate-pulse"
+                />
+              )}
             </div>
           </div>
 

@@ -6,6 +6,7 @@ interface WeeklyStatsProps {
   totalHours: number;
   meetingCount: number;
   averageGrade: string;
+  potentialSavings?: number;
 }
 
 export default function WeeklyStatsOverview({
@@ -13,6 +14,7 @@ export default function WeeklyStatsOverview({
   totalHours,
   meetingCount,
   averageGrade,
+  potentialSavings,
 }: WeeklyStatsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -66,9 +68,9 @@ export default function WeeklyStatsOverview({
           <div>
             <p className="text-sm text-muted-foreground">Potential Savings</p>
             <p className="text-3xl font-display font-bold mt-1">
-              ${Math.round(totalCost * 0.3).toLocaleString()}
+              ${((potentialSavings ?? Math.round(totalCost * 0.3))).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">30% target reduction</p>
+            <p className="text-xs text-muted-foreground mt-1">Estimated based on agenda analysis</p>
           </div>
           <div className="p-2 bg-chart-5/10 rounded-md">
             <TrendingDown className="w-5 h-5 text-chart-5" />

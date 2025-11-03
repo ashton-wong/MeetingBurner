@@ -8,13 +8,16 @@ import Dashboard from "@/pages/Dashboard";
 import SetupMeeting from "@/pages/SetupMeeting";
 import ActiveMeeting from "@/pages/ActiveMeeting";
 import NotFound from "@/pages/not-found";
+import MeetingResults from "@/pages/MeetingResults";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/setup" component={SetupMeeting} />
-      <Route path="/active" component={ActiveMeeting} />
+  <Route path="/active" component={ActiveMeeting} />
+  <Route path="/results" component={MeetingResults} />
+  <Route path="/results/:id" component={MeetingResults} />
       <Route component={NotFound} />
     </Switch>
   );

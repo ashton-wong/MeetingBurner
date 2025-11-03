@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, X, Timer, DollarSign } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 import { SALARY_BANDS, type Role } from "@shared/schema";
 
 interface Attendee {
@@ -27,16 +29,27 @@ interface MeetingSetupFormProps {
     attendees: Attendee[];
     durationMinutes: number;
     hasAgenda: boolean;
+    agenda?: { id: string; title: string; minutes: number }[];
   }) => void;
 }
 
 export default function MeetingSetupForm({ onStartMeeting }: MeetingSetupFormProps) {
+  const { toast } = useToast();
+  const [recommendations, setRecommendations] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const recs = JSON.parse(localStorage.getItem('agendaRecommendations') || '[]') as string[];
+    setRecommendations(new Set(recs));
+  }, []);
   const [title, setTitle] = useState("");
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [newAttendeeName, setNewAttendeeName] = useState("");
   const [newAttendeeRole, setNewAttendeeRole] = useState<Role>("Mid");
   const [durationMinutes, setDurationMinutes] = useState(30);
   const [hasAgenda, setHasAgenda] = useState(false);
+  const [agendaItems, setAgendaItems] = useState<{ id: string; title: string; minutes: number }[]>([]);
+  const [newAgendaTitle, setNewAgendaTitle] = useState("");
+  const [newAgendaMinutes, setNewAgendaMinutes] = useState<number>(5);
 
   const estimatedCost = attendees.reduce(
     (sum, att) => sum + (SALARY_BANDS[att.role] / 60) * durationMinutes,
@@ -72,7 +85,31 @@ export default function MeetingSetupForm({ onStartMeeting }: MeetingSetupFormPro
       attendees,
       durationMinutes,
       hasAgenda,
+      agenda: agendaItems,
     });
+  };
+
+  const handleAddAgendaItem = () => {
+    if (!newAgendaTitle.trim() || newAgendaMinutes <= 0) return;
+    const trimmed = newAgendaTitle.trim();
+    if (recommendations.has(trimmed)) {
+      toast({
+        title: 'Heads up',
+        description: `${trimmed} was often completed very quickly in past meetings — it might be an email instead.`,
+        variant: 'destructive',
+      });
+    }
+
+    setAgendaItems([
+      ...agendaItems,
+      { id: Math.random().toString(), title: newAgendaTitle.trim(), minutes: newAgendaMinutes },
+    ]);
+    setNewAgendaTitle("");
+    setNewAgendaMinutes(5);
+  };
+
+  const handleRemoveAgendaItem = (id: string) => {
+    setAgendaItems(agendaItems.filter((a) => a.id !== id));
   };
 
   const getRoleBadgeColor = (role: Role) => {
@@ -176,11 +213,18 @@ export default function MeetingSetupForm({ onStartMeeting }: MeetingSetupFormPro
               >
                 -
               </Button>
-              <div className="flex items-center gap-2 min-w-[120px] justify-center">
+              <div className="flex items-center gap-2 min-w-[160px] justify-center">
                 <Timer className="w-4 h-4 text-muted-foreground" />
-                <span className="text-2xl font-display font-bold" data-testid="text-duration">
-                  {durationMinutes}m
-                </span>
+                <Input
+                  id="duration"
+                  type="number"
+                  min={1}
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(Math.max(1, Number(e.target.value) || 0))}
+                  className="text-2xl font-display font-bold text-center w-24"
+                  data-testid="input-duration-minutes"
+                />
+                <span className="ml-2">m</span>
               </div>
               <Button
                 type="button"
@@ -211,6 +255,53 @@ export default function MeetingSetupForm({ onStartMeeting }: MeetingSetupFormPro
             />
           </div>
 
+          {hasAgenda && (
+            <Card className="p-4">
+              <Label className="mb-2">Agenda</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={newAgendaTitle}
+                  onChange={(e) => setNewAgendaTitle(e.target.value)}
+                  placeholder="Agenda item"
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddAgendaItem();
+                    }
+                  }}
+                />
+                <Input
+                  type="number"
+                  value={newAgendaMinutes}
+                  onChange={(e) => setNewAgendaMinutes(Number(e.target.value))}
+                  className="w-24"
+                />
+                <Button type="button" size="icon" onClick={handleAddAgendaItem}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {agendaItems.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {agendaItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between gap-2">
+                      <div>
+                        <div className="font-medium">{item.title}</div>
+                        <div className="text-sm text-muted-foreground">{item.minutes} minutes</div>
+                      </div>
+                      <div>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveAgendaItem(item.id)}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+
           <Card className="p-6 bg-destructive/5 border-destructive/20">
             <div className="flex items-center justify-between">
               <div>
@@ -233,7 +324,7 @@ export default function MeetingSetupForm({ onStartMeeting }: MeetingSetupFormPro
             type="submit"
             size="lg"
             className="w-full text-lg"
-            disabled={!title.trim() || attendees.length === 0}
+            disabled={!title.trim() || attendees.length === 0 || !hasAgenda || agendaItems.length === 0}
             data-testid="button-start-meeting"
           >
             Start Meeting Timer

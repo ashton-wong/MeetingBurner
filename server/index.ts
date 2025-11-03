@@ -1,8 +1,22 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import MemoryStoreFactory from "memorystore";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Session middleware (stores session in memory for dev). In production use a
+// persistent store (Redis, DB). This enables persisting Google refresh tokens
+// server-side so users don't need to paste tokens.
+const MemoryStore = MemoryStoreFactory(session);
+app.use(session({
+  store: new MemoryStore({ checkPeriod: 86400000 }),
+  secret: process.env.SESSION_SECRET || "dev-secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 },
+}));
 
 declare module 'http' {
   interface IncomingMessage {
@@ -71,11 +85,14 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  // reusePort is not supported on all platforms (macOS/others may throw ENOTSUP).
+  // Only set reusePort when running on Linux where it's commonly supported.
+  const listenOpts: any = { port, host: "0.0.0.0" };
+  if (process.platform === "linux") {
+    listenOpts.reusePort = true;
+  }
+
+  server.listen(listenOpts, () => {
     log(`serving on port ${port}`);
   });
 })();
